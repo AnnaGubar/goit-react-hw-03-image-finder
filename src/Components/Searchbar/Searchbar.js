@@ -2,26 +2,26 @@ import React, { Component } from 'react';
 import s from './Searchbar.module.css';
 
 class Searchbar extends Component {
-  state = {
-    searchValue: '',
-  };
+  handleSubmit = event => {
+    event.preventDefault();
 
-  handleSearchValue = e => {
-    this.setState({ searchValue: e.currentTarget.value });
+    const { searchValue } = event.currentTarget.children;
+    this.props.onSubmit(searchValue.value);
+
+    searchValue.value = '';
   };
 
   render() {
     return (
       <header className={s.Searchbar}>
-        <form className={s.SearchForm}>
+        <form className={s.SearchForm} onSubmit={this.handleSubmit}>
           <button type="submit" className={s.SearchFormBtn}>
             <span className={s.SearchFormBtnLabel}>Search</span>
           </button>
 
           <input
             className={s.SearchFormInput}
-            value={this.state.searchValue}
-            onChange={this.handleSearchValue}
+            name="searchValue"
             type="text"
             autoComplete="off"
             autoFocus
