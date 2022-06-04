@@ -16,7 +16,8 @@ const Status = {
 class ImageGallery extends Component {
   state = {
     gallery: null,
-    // page: 1,
+    page: 1,
+    total: 0,
 
     showModal: false,
     clickedImage: '',
@@ -25,23 +26,62 @@ class ImageGallery extends Component {
     status: Status.IDLE,
   };
 
-  componentDidUpdate(prevProps, prevState) {
-    const prevName = prevProps.searchValue;
-    const nextName = this.props.searchValue;
+  endindScroll = React.createRef(); // свойство для скрола вниз страницы
 
-    if (prevName !== nextName) {
-      this.setState({ status: Status.PENDING });
+  componentDidUpdate(prevProps, prevState) {
+    // console.log('prevProps', prevProps);
+    // console.log('prevState', prevState);
+
+    if (prevProps.searchValue !== this.props.searchValue) {
+      this.setState({ gallery: null, page: 1, status: Status.PENDING });
+
+      console.log(
+        'поменялось searchValue',
+        this.props.searchValue,
+        this.state.page,
+        this.state.gallery,
+      );
 
       imagesApi
-        .fetchImages(nextName)
+        .fetchImages(this.props.searchValue, this.state.page)
         .then(results => {
+          const { hits, total } = results;
+
           this.setState({
+            gallery: hits,
+            total,
             status: Status.RESOLVED,
-            gallery: results,
           });
         })
         .catch(error => this.setState({ error, status: Status.REJECTED }));
     }
+
+    if (prevState.page !== this.state.page) {
+      console.log(
+        'поменялось page',
+        this.props.searchValue,
+        this.state.page,
+        this.state.gallery,
+      );
+      this.setState({ status: Status.PENDING });
+
+      imagesApi
+        .fetchImages(this.props.searchValue, this.state.page)
+        .then(results => {
+          const { hits, total } = results;
+
+          this.setState({
+            gallery: [...prevState.gallery, ...hits],
+            total,
+            status: Status.RESOLVED,
+          });
+
+          this.scrollToBottom(); // скрол вниз страницы
+        })
+        .catch(error => this.setState({ error, status: Status.REJECTED }));
+    }
+
+    // console.log('this.state', this.state);
   }
 
   toggleModal = () => {
@@ -53,6 +93,16 @@ class ImageGallery extends Component {
   showModalImage = clickedImage => {
     this.toggleModal();
     this.setState({ clickedImage });
+  };
+
+  incrementPage = e => {
+    e.preventDefault();
+    this.setState(prevState => ({ page: prevState.page + 1 }));
+    // console.log('incrementPage', this.state);
+  };
+
+  scrollToBottom = () => {
+    this.endindScroll.current.scrollIntoView({ behavior: 'smooth' });
   };
 
   render() {
@@ -71,13 +121,11 @@ class ImageGallery extends Component {
     }
 
     if (status === 'resolved') {
-      const { gallery } = this.state;
-      console.log('gallery.total', gallery.total);
-
+      const { gallery, total } = this.state;
       return (
         <div>
           <ul className={s.ImageGallery}>
-            {gallery.hits.map(({ id, largeImageURL, webformatURL, tags }) => (
+            {gallery.map(({ id, largeImageURL, webformatURL, tags }) => (
               <ImageGalleryItem
                 key={id}
                 largeImageURL={largeImageURL}
@@ -87,14 +135,17 @@ class ImageGallery extends Component {
               />
             ))}
           </ul>
-
-          {gallery.total > 12 && <Button title="Load more" />}
+          {total > 12 && (
+            <Button title="Load more" onClick={this.incrementPage} />
+          )}
 
           {this.state.showModal && (
             <Modal onClose={this.toggleModal} source={clickedImage}>
               <img src={clickedImage} alt="large" />
             </Modal>
           )}
+
+          <div ref={this.endindScroll} />
         </div>
       );
     }

@@ -6,6 +6,7 @@ import ImageGallery from './Components/ImageGallery';
 class App extends Component {
   state = {
     searchValue: '',
+    // page: 1,
   };
 
   handleValueSearch = searchValue => {
@@ -16,7 +17,10 @@ class App extends Component {
     return (
       <div className={s.App}>
         <Searchbar onSubmit={this.handleValueSearch} />
-        <ImageGallery searchValue={this.state.searchValue} />
+        <ImageGallery
+          searchValue={this.state.searchValue}
+          // page={this.state.page}
+        />
       </div>
     );
   }

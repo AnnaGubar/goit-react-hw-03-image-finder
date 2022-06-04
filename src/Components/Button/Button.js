@@ -1,8 +1,8 @@
 import s from './Button.module.css';
 
-const Button = ({ title }) => {
+const Button = ({ title, onClick }) => {
   return (
-    <button className={s.loadBtn} type="submit">
+    <button className={s.loadBtn} type="submit" onClick={onClick}>
       {title}
     </button>
   );
