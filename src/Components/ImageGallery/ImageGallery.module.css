@@ -43,7 +43,7 @@ body {
       rgba(99, 111, 164, 0.4) 0%,
       rgba(232, 203, 192, 0.4) 100%
     ),
-    url(https://oir.mobi/uploads/posts/2021-03/thumbs/1616990293_11-p-fon-dlya-risovaniya-12.jpg);
+    url(../pictures/background.jpg);
   background-color: #e8cbc0;
   background-size: cover;
   background-attachment: fixed;

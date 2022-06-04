@@ -15,10 +15,12 @@ const Status = {
 
 class ImageGallery extends Component {
   state = {
-    searchValue: '',
-    gallery: [],
+    gallery: null,
+    // page: 1,
+
     showModal: false,
     clickedImage: '',
+
     error: null,
     status: Status.IDLE,
   };
@@ -32,8 +34,11 @@ class ImageGallery extends Component {
 
       imagesApi
         .fetchImages(nextName)
-        .then(searchValue => {
-          this.setState({ searchValue, status: Status.RESOLVED });
+        .then(results => {
+          this.setState({
+            status: Status.RESOLVED,
+            gallery: results,
+          });
         })
         .catch(error => this.setState({ error, status: Status.REJECTED }));
     }
@@ -51,7 +56,6 @@ class ImageGallery extends Component {
   };
 
   render() {
-    const { hits } = this.state.searchValue;
     const { clickedImage, status } = this.state;
 
     if (status === 'idle') {
@@ -67,10 +71,13 @@ class ImageGallery extends Component {
     }
 
     if (status === 'resolved') {
+      const { gallery } = this.state;
+      console.log('gallery.total', gallery.total);
+
       return (
         <div>
           <ul className={s.ImageGallery}>
-            {hits.map(({ id, largeImageURL, webformatURL, tags }) => (
+            {gallery.hits.map(({ id, largeImageURL, webformatURL, tags }) => (
               <ImageGalleryItem
                 key={id}
                 largeImageURL={largeImageURL}
@@ -81,7 +88,7 @@ class ImageGallery extends Component {
             ))}
           </ul>
 
-          <Button title="Load more" />
+          {gallery.total > 12 && <Button title="Load more" />}
 
           {this.state.showModal && (
             <Modal onClose={this.toggleModal} source={clickedImage}>

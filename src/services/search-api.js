@@ -4,6 +4,7 @@ const perPage = 12;
 let page = 1;
 
 async function fetchImages(searchValue) {
+  // async function fetchImages(searchValue, page = 1) {
   const response = await fetch(
     `${BASE_URL}?q=${searchValue}&page=${page}&key=${KEY}&image_type=photo&orientation=horizontal&per_page=${perPage}`,
   );
