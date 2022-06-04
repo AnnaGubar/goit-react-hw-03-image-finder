@@ -1,9 +1,11 @@
 const BASE_URL = 'https://pixabay.com/api/';
 const KEY = '25849699-edc9a69ae2fd4562ebcb7ccdf';
+const perPage = 12;
+let page = 1;
 
 async function fetchImages(searchValue) {
   const response = await fetch(
-    `${BASE_URL}?q=${searchValue}&page=1&key=${KEY}&image_type=photo&orientation=horizontal&per_page=12`,
+    `${BASE_URL}?q=${searchValue}&page=${page}&key=${KEY}&image_type=photo&orientation=horizontal&per_page=${perPage}`,
   );
   if (response.ok) {
     return response.json();

@@ -28,3 +28,23 @@
   transform: scale(1.03);
   cursor: zoom-in;
 }
+
+.title {
+  margin-top: 200px;
+  text-align: center;
+  font-size: 40px;
+  font-weight: 900;
+  color: rgba(69, 69, 192, 0.462);
+}
+
+body {
+  background-image: linear-gradient(
+      to right,
+      rgba(99, 111, 164, 0.4) 0%,
+      rgba(232, 203, 192, 0.4) 100%
+    ),
+    url(https://oir.mobi/uploads/posts/2021-03/thumbs/1616990293_11-p-fon-dlya-risovaniya-12.jpg);
+  background-color: #e8cbc0;
+  background-size: cover;
+  background-attachment: fixed;
+}
