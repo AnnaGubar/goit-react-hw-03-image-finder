@@ -120,8 +120,8 @@ class ImageGallery extends Component {
         .catch(error => this.setState({ error, status: Status.REJECTED }));
     }
 
-    if (prevState.page !== this.state.page || this.state.page !== 1) {
-      // if (prevState.page !== this.state.page) {
+    // if (prevState.page !== this.state.page) {
+    if (prevState.page !== this.state.page && this.state.page !== 1) {
       this.setState({ status: Status.PENDING });
 
       imagesApi
