@@ -101,7 +101,8 @@ class ImageGallery extends Component {
       console.log(this.state);
 
       imagesApi
-        .fetchImages(this.props.searchValue, this.state.page)
+        // .fetchImages(this.props.searchValue, this.state.page)
+        .fetchImages(this.props.searchValue, 1)
         .then(results => {
           const { hits, total } = results;
 
@@ -119,8 +120,8 @@ class ImageGallery extends Component {
         .catch(error => this.setState({ error, status: Status.REJECTED }));
     }
 
-    // if (prevState.page !== this.state.page || this.state.page !== 1) {
-    if (prevState.page !== this.state.page) {
+    if (prevState.page !== this.state.page || this.state.page !== 1) {
+      // if (prevState.page !== this.state.page) {
       this.setState({ status: Status.PENDING });
 
       imagesApi
