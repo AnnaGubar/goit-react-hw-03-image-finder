@@ -1,10 +1,16 @@
 import React, { Component } from 'react';
 import { createPortal } from 'react-dom';
+import propTypes from 'prop-types';
 import s from './Modal.module.css';
 
 const modalRoot = document.querySelector('#modal-root');
 
 export default class Modal extends Component {
+  static propTypes = {
+    source: propTypes.string.isRequired,
+    onClose: propTypes.func.isRequired,
+  };
+
   // создаем слушатель события keydown (закрытие по Escape)
   componentDidMount() {
     // console.log('Modal componentDidMount');

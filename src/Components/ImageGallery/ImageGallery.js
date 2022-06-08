@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import propTypes from 'prop-types';
 import s from './ImageGallery.module.css';
 import imagesApi from '../../services/search-api';
 import ImageGalleryItem from './ImageGalleryItem';
@@ -11,6 +12,7 @@ const Status = {
   PENDING: 'pending',
   RESOLVED: 'resolved',
   REJECTED: 'rejected',
+  NOTFOUND: 'not found',
 };
 
 class ImageGallery extends Component {
@@ -18,6 +20,7 @@ class ImageGallery extends Component {
     gallery: null,
     page: 1,
     total: 0,
+    hitsLength: 0,
 
     showModal: false,
     clickedImage: '',
@@ -28,28 +31,91 @@ class ImageGallery extends Component {
 
   endindScroll = React.createRef(); // свойство для скрола вниз страницы
 
+  static propTypes = {
+    searchValue: propTypes.string.isRequired,
+
+    // largeImageURL: propTypes.string.isRequired,
+    // webformatURL: propTypes.string.isRequired,
+    // tags: propTypes.string.isRequired,
+    // id: propTypes.string.isRequired,
+  };
+
   componentDidUpdate(prevProps, prevState) {
-    // console.log('prevProps', prevProps);
-    // console.log('prevState', prevState);
+    if (!this.props.searchValue) {
+      alert('Введите значение для поиска');
+    }
+
+    // if (
+    //   prevProps.searchValue !== this.props.searchValue ||
+    //   prevState.page !== this.state.page
+    // ) {
+    //   this.setState({ status: Status.PENDING });
+
+    //   imagesApi
+    //     .fetchImages(this.props.searchValue, this.state.page)
+    //     .then(results => {
+    //       const { hits, total } = results;
+
+    //       // console.log('⭐ ~ ImageGallery ~ results', results);
+    //       // console.log(this.state.page, hits);
+    //       // console.log(this.state.gallery);
+
+    //       if (!total) {
+    //         return this.setState({ status: Status.NOTFOUND });
+    //       }
+
+    //       if (
+    //         this.state.gallery === null ||
+    //         prevProps.searchValue !== this.props.searchValue
+    //       ) {
+    //         // console.log(this.state.gallery, this.state.page);
+    //         console.log('1', this.state.page);
+    //         this.setState({
+    //           gallery: [...hits],
+    //           page: 1,
+    //           total,
+    //           hitsLength: hits.length,
+    //           status: Status.RESOLVED,
+    //         });
+    //       } else {
+    //         // console.log(this.state.gallery, this.state.page);
+    //         console.log('2', this.state.page);
+    //         this.setState(({ gallery }) => ({
+    //           gallery: [...gallery, ...hits],
+    //           hitsLength: hits.length,
+    //           status: Status.RESOLVED,
+    //         }));
+    //       }
+
+    //       this.scrollToBottom();
+    //     })
+    //     .catch(error => this.setState({ error, status: Status.REJECTED }));
+
+    //   // console.log(this.state);
+    // }
+
+    //*---------------------------------------------------------------------
 
     if (prevProps.searchValue !== this.props.searchValue) {
       this.setState({ gallery: null, page: 1, status: Status.PENDING });
-
-      console.log(
-        'поменялось searchValue',
-        this.props.searchValue,
-        this.state.page,
-        this.state.gallery,
-      );
-
+      //   console.group('поменялось searchValue');
+      //   console.log('searchValue', this.props.searchValue);
+      //   console.log('page', this.state.page);
+      //   console.log('gallery', this.state.gallery);
+      //   console.log('prevState.gallery', prevState.gallery);
+      //   console.groupEnd();
       imagesApi
         .fetchImages(this.props.searchValue, this.state.page)
         .then(results => {
           const { hits, total } = results;
 
+          if (!total) {
+            return this.setState({ status: Status.NOTFOUND });
+          }
           this.setState({
-            gallery: hits,
+            gallery: [...hits],
             total,
+            hitsLength: hits.length,
             status: Status.RESOLVED,
           });
         })
@@ -57,31 +123,34 @@ class ImageGallery extends Component {
     }
 
     if (prevState.page !== this.state.page) {
-      console.log(
-        'поменялось page',
-        this.props.searchValue,
-        this.state.page,
-        this.state.gallery,
-      );
+      //     console.group('поменялось page');
+      //     console.log('searchValue', this.props.searchValue);
+      //     console.log('page', this.state.page);
+      //     console.log('gallery', this.state.gallery);
+      //     console.log('prevState.gallery', prevState.gallery);
+      //     console.groupEnd();
       this.setState({ status: Status.PENDING });
-
       imagesApi
         .fetchImages(this.props.searchValue, this.state.page)
         .then(results => {
-          const { hits, total } = results;
-
-          this.setState({
-            gallery: [...prevState.gallery, ...hits],
-            total,
+          const { hits } = results;
+          // console.log('--------------', prevState.gallery);
+          this.setState(({ gallery }) => ({
+            gallery: [...gallery, ...hits],
+            hitsLength: hits.length,
             status: Status.RESOLVED,
-          });
-
+          }));
           this.scrollToBottom(); // скрол вниз страницы
         })
         .catch(error => this.setState({ error, status: Status.REJECTED }));
     }
 
-    // console.log('this.state', this.state);
+    // console.group('this.state');
+    // console.log('searchValue', this.props.searchValue);
+    // console.log('page', this.state.page);
+    // console.log('gallery', this.state.gallery);
+    // console.log('prevState.gallery', prevState.gallery);
+    // console.groupEnd();
   }
 
   toggleModal = () => {
@@ -98,7 +167,6 @@ class ImageGallery extends Component {
   incrementPage = e => {
     e.preventDefault();
     this.setState(prevState => ({ page: prevState.page + 1 }));
-    // console.log('incrementPage', this.state);
   };
 
   scrollToBottom = () => {
@@ -112,16 +180,21 @@ class ImageGallery extends Component {
       return <div className={s.title}>Пока еще ничего не искали</div>;
     }
 
+    if (status === 'not found') {
+      return <div className={s.title}>Поиск не дал результатов</div>;
+    }
+
     if (status === 'pending') {
       return <Loader />;
     }
 
     if (status === 'rejected') {
-      return <div>rejected</div>;
+      return <div className={s.title}>Произошла ошибка</div>;
     }
 
     if (status === 'resolved') {
-      const { gallery, total } = this.state;
+      const { gallery, hitsLength } = this.state;
+      const { endindScroll, showModalImage, incrementPage, toggleModal } = this;
       return (
         <div>
           <ul className={s.ImageGallery}>
@@ -131,21 +204,22 @@ class ImageGallery extends Component {
                 largeImageURL={largeImageURL}
                 webformatURL={webformatURL}
                 tags={tags}
-                showModalImage={this.showModalImage}
+                showModalImage={showModalImage}
               />
             ))}
           </ul>
-          {total > 12 && (
-            <Button title="Load more" onClick={this.incrementPage} />
+
+          <div ref={endindScroll} />
+
+          {hitsLength === 12 && (
+            <Button title="Load more" onClick={incrementPage} />
           )}
 
           {this.state.showModal && (
-            <Modal onClose={this.toggleModal} source={clickedImage}>
+            <Modal onClose={toggleModal} source={clickedImage}>
               <img src={clickedImage} alt="large" />
             </Modal>
           )}
-
-          <div ref={this.endindScroll} />
         </div>
       );
     }
