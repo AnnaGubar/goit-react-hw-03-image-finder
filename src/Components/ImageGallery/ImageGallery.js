@@ -98,12 +98,8 @@ class ImageGallery extends Component {
 
     if (prevProps.searchValue !== this.props.searchValue) {
       this.setState({ gallery: null, page: 1, status: Status.PENDING });
-      //   console.group('поменялось searchValue');
-      //   console.log('searchValue', this.props.searchValue);
-      //   console.log('page', this.state.page);
-      //   console.log('gallery', this.state.gallery);
-      //   console.log('prevState.gallery', prevState.gallery);
-      //   console.groupEnd();
+      console.log(this.state);
+
       imagesApi
         .fetchImages(this.props.searchValue, this.state.page)
         .then(results => {
@@ -112,6 +108,7 @@ class ImageGallery extends Component {
           if (!total) {
             return this.setState({ status: Status.NOTFOUND });
           }
+
           this.setState({
             gallery: [...hits],
             total,
@@ -123,34 +120,23 @@ class ImageGallery extends Component {
     }
 
     if (prevState.page !== this.state.page) {
-      //     console.group('поменялось page');
-      //     console.log('searchValue', this.props.searchValue);
-      //     console.log('page', this.state.page);
-      //     console.log('gallery', this.state.gallery);
-      //     console.log('prevState.gallery', prevState.gallery);
-      //     console.groupEnd();
       this.setState({ status: Status.PENDING });
+
       imagesApi
         .fetchImages(this.props.searchValue, this.state.page)
         .then(results => {
           const { hits } = results;
-          // console.log('--------------', prevState.gallery);
+
           this.setState(({ gallery }) => ({
             gallery: [...gallery, ...hits],
             hitsLength: hits.length,
             status: Status.RESOLVED,
           }));
+
           this.scrollToBottom(); // скрол вниз страницы
         })
         .catch(error => this.setState({ error, status: Status.REJECTED }));
     }
-
-    // console.group('this.state');
-    // console.log('searchValue', this.props.searchValue);
-    // console.log('page', this.state.page);
-    // console.log('gallery', this.state.gallery);
-    // console.log('prevState.gallery', prevState.gallery);
-    // console.groupEnd();
   }
 
   toggleModal = () => {
