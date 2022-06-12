@@ -105,7 +105,7 @@ class App extends Component {
   };
 
   render() {
-    console.log('gallery', this.state.page, this.state.gallery);
+    // console.log('gallery', this.state.page, this.state.gallery);
 
     const { clickedImage, status, gallery, hitsLength, showModal } = this.state;
     const { handleValueSearch, showModalImage, incrementPage, toggleModal } =
