@@ -2,16 +2,16 @@ import propTypes from 'prop-types';
 import s from './ImageGallery.module.css';
 
 const ImageGallery = ({
-  largeImageURL,
-  webformatURL,
   tags,
+  webformatURL,
+  largeImageURL,
   showModalImage,
 }) => {
   return (
     <li className={s.ImageGalleryItem}>
       <img
-        src={webformatURL}
         alt={tags}
+        src={webformatURL}
         className={s.ImageGalleryItemImage}
         onClick={() => {
           showModalImage(largeImageURL);

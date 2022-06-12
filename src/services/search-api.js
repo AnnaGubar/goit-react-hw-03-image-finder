@@ -35,8 +35,8 @@ async function fetchImages(searchValue, page) {
   return await Promise.reject(new Error(`Нет совпадений с "${searchValue}"`));
 }
 
-const api = {
+const searchApi = {
   fetchImages,
 };
 
-export default api;
+export default searchApi;
