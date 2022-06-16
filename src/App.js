@@ -77,7 +77,6 @@ class App extends Component {
         }
       })
       .catch(console.log)
-      .catch(error => console.log(error))
       .finally(() => this.setState({ isLoading: false}));
   };
 
