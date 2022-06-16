@@ -8,24 +8,19 @@ import Modal from './Components/Modal';
 import Searchbar from './Components/Searchbar';
 import ImageGallery from './Components/ImageGallery';
 
-const Status = {
-  IDLE: 'idle',
-  PENDING: 'pending',
-  RESOLVED: 'resolved',
-  REJECTED: 'rejected',
-  NOTFOUND: 'not found',
-};
-
 class App extends Component {
   state = {
     searchValue: '',
+    gallery: [],
     page: 1,
+    totalHits: null,
+
+    isLoading: false,
+
     showModal: false,
     clickedImage: null,
-    status: Status.IDLE,
-    gallery: [],
-    hitsLength: null,
-    error: null,
+
+    isNotFound: false,
   };
 
   componentDidUpdate(_, prevState) {
@@ -34,28 +29,27 @@ class App extends Component {
     const prevPage = prevState.page;
 
     if (prevSearchValue !== searchValue) {
-      this.setState({ gallery: [], status: Status.PENDING });
+      this.setState({ gallery: [], isLoading: true, isNotFound: false });
       this.handleRequest(prevSearchValue, prevPage);
     }
 
     if (prevSearchValue === searchValue && prevPage !== page) {
-      this.setState({ status: Status.PENDING });
+      this.setState({ isLoading: true, isNotFound: false });
       this.handleRequest(prevSearchValue, prevPage);
     }
   }
 
   handleRequest = (prevSearchValue, prevPage) => {
-    // this.setState({ status: Status.PENDING });
+    const { searchValue, page } = this.state;
 
     searchApi
-      .fetchImages(this.state.searchValue, this.state.page)
+      .fetchImages(searchValue, page)
       .then(({ total, hits }) => {
         if (!total) {
           this.setState({
             gallery: [],
             page: 1,
-            hitsLength: 0,
-            status: Status.NOTFOUND,
+            isNotFound: true,
           });
           return;
         }
@@ -69,28 +63,22 @@ class App extends Component {
           };
         });
 
-        // this.setState({ hitsLength: data.length, status: Status.RESOLVED });
-
-        if (prevSearchValue !== this.state.searchQuery) {
+        if (prevSearchValue !== searchValue) {
           this.setState({
             gallery: data,
-            hitsLength: data.length,
-            status: Status.RESOLVED,
+            totalHits: total,
           });
         }
 
-        if (
-          prevSearchValue === this.state.searchValue &&
-          prevPage !== this.state.page
-        ) {
+        if (prevSearchValue === searchValue && prevPage !== page) {
           this.setState(prevState => ({
             gallery: [...prevState.gallery, ...data],
-            hitsLength: data.length,
-            status: Status.RESOLVED,
           }));
         }
       })
-      .catch(error => this.setState({ error, status: Status.REJECTED }));
+      .catch(console.log)
+      .catch(error => console.log(error))
+      .finally(() => this.setState({ isLoading: false}));
   };
 
   handleValueSearch = searchValue => {
@@ -116,35 +104,35 @@ class App extends Component {
   };
 
   render() {
-    // console.log('gallery', this.state.page, this.state.gallery);
+    console.log('gallery', this.state);
 
-    const { clickedImage, status, gallery, hitsLength, showModal } = this.state;
+    const {
+      clickedImage,
+      gallery,
+      showModal,
+      isLoading,
+      totalHits,
+      isNotFound,
+    } = this.state;
     const { handleValueSearch, showModalImage, incrementPage, toggleModal } =
       this;
     return (
       <div className={s.App}>
         <Searchbar onSubmit={handleValueSearch} />
 
-        {status === 'idle' && (
+        {!isLoading && gallery.length === 0 && !isNotFound && (
           <div className={s.title}>Пока еще ничего не искали</div>
         )}
 
+        {isNotFound && <div className={s.title}>Поиск не дал результатов</div>}
 
-        {status === 'not found' && (
-          <div className={s.title}>Поиск не дал результатов</div>
-          )}
-
-        {status === 'resolved' && (
+        {gallery && (
           <ImageGallery gallery={gallery} showModalImage={showModalImage} />
-          )}
+        )}
 
-        {status === 'rejected' && (
-          <div className={s.title}>Произошла ошибка</div>
-          )}
+        {isLoading && <Loader />}
 
-          {status === 'pending' && <Loader />}
-
-        {hitsLength === 12 && status === 'resolved' && (
+        {gallery.length > 11 && gallery.length !== totalHits && !isLoading && (
           <Button title="Load more" onClick={incrementPage} />
         )}
 
