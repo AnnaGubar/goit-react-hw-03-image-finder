@@ -34,22 +34,29 @@ class App extends Component {
     const prevPage = prevState.page;
 
     if (prevSearchValue !== searchValue) {
+      this.setState({ gallery: [], status: Status.PENDING });
       this.handleRequest(prevSearchValue, prevPage);
     }
 
     if (prevSearchValue === searchValue && prevPage !== page) {
+      this.setState({ status: Status.PENDING });
       this.handleRequest(prevSearchValue, prevPage);
     }
   }
 
   handleRequest = (prevSearchValue, prevPage) => {
-    this.setState({ status: Status.PENDING });
+    // this.setState({ status: Status.PENDING });
 
     searchApi
       .fetchImages(this.state.searchValue, this.state.page)
       .then(({ total, hits }) => {
         if (!total) {
-          this.setState({ hitsLength: 0, status: Status.NOTFOUND });
+          this.setState({
+            gallery: [],
+            page: 1,
+            hitsLength: 0,
+            status: Status.NOTFOUND,
+          });
           return;
         }
 
@@ -62,11 +69,13 @@ class App extends Component {
           };
         });
 
-        this.setState({ hitsLength: data.length, status: Status.RESOLVED });
+        // this.setState({ hitsLength: data.length, status: Status.RESOLVED });
 
         if (prevSearchValue !== this.state.searchQuery) {
           this.setState({
             gallery: data,
+            hitsLength: data.length,
+            status: Status.RESOLVED,
           });
         }
 
@@ -76,6 +85,8 @@ class App extends Component {
         ) {
           this.setState(prevState => ({
             gallery: [...prevState.gallery, ...data],
+            hitsLength: data.length,
+            status: Status.RESOLVED,
           }));
         }
       })
@@ -88,7 +99,7 @@ class App extends Component {
       return;
     }
 
-    this.setState({ searchValue, gallery: [], page: 1 });
+    this.setState({ searchValue, page: 1 });
   };
 
   toggleModal = () => {
@@ -118,19 +129,20 @@ class App extends Component {
           <div className={s.title}>Пока еще ничего не искали</div>
         )}
 
-        {status === 'pending' && <Loader />}
 
         {status === 'not found' && (
           <div className={s.title}>Поиск не дал результатов</div>
-        )}
+          )}
 
         {status === 'resolved' && (
           <ImageGallery gallery={gallery} showModalImage={showModalImage} />
-        )}
+          )}
 
         {status === 'rejected' && (
           <div className={s.title}>Произошла ошибка</div>
-        )}
+          )}
+
+          {status === 'pending' && <Loader />}
 
         {hitsLength === 12 && status === 'resolved' && (
           <Button title="Load more" onClick={incrementPage} />
